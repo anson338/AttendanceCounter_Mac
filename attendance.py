@@ -1,9 +1,12 @@
+#!/usr/bin/python
 import os
 import re
+import sys
+import time
 from datetime import datetime, timedelta
 
 def asciiNode():
-	print ("""
+  print ("""
             .                .                    
             :"-.          .-";                    
             |:`.`.__..__.'.';|                    
@@ -34,7 +37,7 @@ def asciiNode():
        "-:___..--"      "--..___;-" """)
 
 def getLastLoginTime():
-	return os.popen('log show --style syslog --predicate \'process == "loginwindow"\' --debug --info --last 11h | grep "LUIAuthenticationServiceProvider deactivateWithContext:]_block_invoke" | head -1').read()
+  return os.popen('log show --style syslog --predicate \'process == "loginwindow"\' --debug --info --last 11h | grep "LUIAuthenticationServiceProvider deactivateWithContext:]_block_invoke" | head -1').read()
 
 def onHandleTime():
   timeString = getLastLoginTime()
@@ -45,16 +48,20 @@ def onHandleTime():
 def addWorkingHours(time):
   return datetime.strptime(time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=9)
 
+def showUI(leaveTimeObj):
+  print ("-------------------------------")
+  print ("--- Your Leave Time After: ---")
+  print leaveTimeObj.strftime('%Y-%m-%d %H:%M:%S')
+  while True:
+    sys.stdout.write("\rRemaining work time : %s" % str(leaveTimeObj - datetime.now())[:-7])
+    sys.stdout.flush()
+    time.sleep(.5)
+  
 def main() :
   asciiNode()
   onWorkTimeStr = onHandleTime()
   leaveTimeObj = addWorkingHours(onWorkTimeStr)
-  print ("-------------------------------")
-  print ("--- Your Leave Time After: ---")
-  print leaveTimeObj.strftime('%Y-%m-%d %H:%M:%S')
-  print ("Remaining work time : " + str(leaveTimeObj - datetime.now())[:-7])
-  print ("-------------------------------")
-  print ("-------------------------------")
+  showUI(leaveTimeObj)
 
 if __name__ == '__main__':
   main()
