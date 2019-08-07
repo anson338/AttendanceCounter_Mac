@@ -3,7 +3,9 @@ import os
 import re
 import sys
 import time
+import subprocess
 from datetime import datetime, timedelta
+from termcolor import colored
 
 def asciiNode():
   print ("""
@@ -50,13 +52,22 @@ def addWorkingHours(time):
 
 def showUI(leaveTimeObj):
   print ("-------------------------------")
-  print ("--- Your Leave Time After: ---")
-  print leaveTimeObj.strftime('%Y-%m-%d %H:%M:%S')
-  while True:
-    sys.stdout.write("\rRemaining work time : %s" % str(leaveTimeObj - datetime.now())[:-7])
-    sys.stdout.flush()
-    time.sleep(.5)
-  
+  print ("--- Your Leave Time: ---")
+  print("-->" , colored(leaveTimeObj.strftime('%Y-%m-%d %H:%M:%S'), 'green'))
+  try:
+    while True:
+      if (leaveTimeObj > datetime.now()) :
+        sys.stdout.write("\rRemaining work time : %s" % colored(str(leaveTimeObj - datetime.now())[:-7], 'white', 'on_green'))
+      else:
+        sys.stdout.write(colored("\rLeave NOW!!!!!!!", 'white', 'on_red'))
+        time.sleep(60)
+        subprocess.call('pmset displaysleepnow', shell=True)
+        break;
+      sys.stdout.flush()
+      time.sleep(1)
+  except KeyboardInterrupt:
+    print("")
+
 def main() :
   asciiNode()
   onWorkTimeStr = onHandleTime()
